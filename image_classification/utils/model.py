@@ -33,11 +33,11 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     return aug_layer
 
 # Classification Model for Low-Res Input
-def ClassificationModel(input_shape, n_class, aug_layer):
+def ClassificationModel(input_shape, n_class, aug_layer=None):
     X_input = Input(input_shape, name='input')
     
     if aug_layer:
-        X = aug_layer(X)
+        X = aug_layer(X_input)
         X = BatchNormalization(name='pre_bn')(X)
     else:
         X = BatchNormalization(name='pre_bn')(X_input)
