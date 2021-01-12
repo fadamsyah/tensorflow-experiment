@@ -22,7 +22,7 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     if contrast: aug_layer.add(RandomContrast(contrast))
     if crop: aug_layer.add(RandomCrop(*crop))
     if flip: aug_layer.add(RandomFlip(flip))
-    if rotation: aug_layer.add(RandomRotation(rotation))
+    if rotation: aug_layer.add(RandomRotation(rotation/360.))
     if translation: aug_layer.add(RandomTranslation(*translation))
     if zoom: aug_layer.add(RandomZoom(zoom))
     if height: aug_layer.add(RandomHeight(height))
