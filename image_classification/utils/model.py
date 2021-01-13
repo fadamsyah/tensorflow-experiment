@@ -32,6 +32,44 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     
     return aug_layer
 
+def VGG(input_shape, n_class):
+    X_input = Input(input_shape)
+        
+    def ConvBNReluBlock(filters, name):
+        block = Sequential([Conv2D(filters, (3,3), strides=(1,1), padding="same", use_bias=False),
+                            BatchNormalization(),
+                            Activation('relu')
+                           ], name=name)
+        return block
+
+    def VGGBlock(X, filters, n_conv, name):
+        for i in range(1, n_conv+1):
+            X = ConvBNReluBlock(filters, name+f'_conv_bn_relu{i}')(X)
+        X = MaxPool2D((2,2), strides=2, padding="valid", name=name+'_pool')(X)
+        return X
+
+    def ArchievedBlock(X, filters, n_conv, name):
+        for i in range(1, n_conv+1):
+            X = Conv2D(filters, (3,3), strides=(1,1), padding="same", use_bias=False, name=name+f'_conv{i}')(X)
+            X = BatchNormalization(name=name+f'_bn{i}')(X)
+            X = Activation('relu', name=name+f'_relu{i}')(X)
+        X = MaxPool2D((2,2), strides=2, padding="valid", name=name+'_pool')(X)
+        return X
+        
+    X = VGGBlock(X_input, 64, 2, 'block1')
+    X = VGGBlock(X, 128, 2, 'block2')
+    X = VGGBlock(X, 256, 3, 'block3')
+    X = VGGBlock(X, 512, 3, 'block4')
+    X = VGGBlock(X, 512, 3, 'block5')
+    
+    X = Flatten(name='flatten_layer')(X)
+    X = Dense(512, activation='relu', name='dense_layer')(X)
+    X = Dropout(0.45, name='dropout_layer')(X)
+    if n_class == 1: X = Dense(1, activation='sigmoid', name='output_layer')(X)
+    else: X = Dense(n_class, activation='softmax', name='output_layer')(X)
+    
+    return Model(inputs=X_input, outputs=X, name='VGG16')
+
 # Classification Model for Low-Res Input
 def ClassificationModel(input_shape, n_class, aug_layer=None):
     X_input = Input(input_shape, name='input')
