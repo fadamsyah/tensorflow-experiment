@@ -59,18 +59,18 @@ def VGG(input_shape, n_class, aug_layer=None):
         
     if aug_layer:
         X = aug_layer(X_input)
-        X = VGGBlock(X, 64, 3, 'block1')
-    else: X = VGGBlock(X_input, 64, 3, 'block1')
-    X = VGGBlock(X, 128, 3, 'block2')
+        X = VGGBlock(X, 64, 2, 'block1')
+    else: X = VGGBlock(X_input, 64, 2, 'block1')
+    X = VGGBlock(X, 128, 2, 'block2')
     X = VGGBlock(X, 256, 3, 'block3')
-    # X = VGGBlock(X, 512, 3, 'block4')
-    # X = VGGBlock(X, 512, 3, 'block5')
+    X = VGGBlock(X, 512, 3, 'block4')
+    X = VGGBlock(X, 512, 3, 'block5')
     
     X = Flatten(name='flatten_layer')(X)
     X = Dense(512, activation='relu', name='dense_layer1')(X)
-    X = Dropout(0.45, name='dropout_layer1')(X)
+    X = Dropout(0.5, name='dropout_layer1')(X)
     X = Dense(512, activation='relu', name='dense_layer2')(X)
-    X = Dropout(0.45, name='dropout_layer2')(X)
+    X = Dropout(0.5, name='dropout_layer2')(X)
     if n_class == 1: X = Dense(1, activation='sigmoid', name='output_layer')(X)
     else: X = Dense(n_class, activation='softmax', name='output_layer')(X)
     
