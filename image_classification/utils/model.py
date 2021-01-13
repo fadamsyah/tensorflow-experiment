@@ -15,9 +15,9 @@ from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, Ran
 # Augmentation Layer
 def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
              flip=None, rotation=None, translation=None, zoom=None,
-             height=None, width=None):
+             height=None, width=None, name='aug_layer'):
     
-    aug_layer = Sequential()
+    aug_layer = Sequential(name=name)
     
     if resize: aug_layer.add(Resizing(*resize, interpolation='lanczos3'))
     if rescaling: aug_layer.add(Rescaling(rescaling))
@@ -32,7 +32,8 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     
     return aug_layer
 
-def VGG(input_shape, n_class):
+# VGG For Low Res Image Classification
+def VGG(input_shape, n_class, aug_layer=None):
     X_input = Input(input_shape)
         
     def ConvBNReluBlock(filters, name):
@@ -56,7 +57,10 @@ def VGG(input_shape, n_class):
         X = MaxPool2D((2,2), strides=2, padding="valid", name=name+'_pool')(X)
         return X
         
-    X = VGGBlock(X_input, 64, 2, 'block1')
+    if aug_layer:
+        X = aug_layer(X_input)
+        X = VGGBlock(X, 64, 2, 'block1')
+    else: X = VGGBlock(X_input, 64, 2, 'block1')
     X = VGGBlock(X, 128, 2, 'block2')
     X = VGGBlock(X, 256, 3, 'block3')
     X = VGGBlock(X, 512, 3, 'block4')
