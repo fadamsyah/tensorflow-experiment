@@ -44,7 +44,7 @@ from tensorflow.python.ops import stateless_random_ops
 from tensorflow.python.ops import variables
 from tensorflow.python.util.tf_export import keras_export
 
-import control_flow_util
+from . import control_flow_util
 
 ResizeMethod = image_ops.ResizeMethod
 

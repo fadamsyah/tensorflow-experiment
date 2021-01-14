@@ -11,9 +11,9 @@ from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
 # from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
 # from tensorflow.keras.layers.experimental.preprocessing import RandomTranslation, RandomZoom
 # from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, RandomWidth
-from preprocessing import Resizing, Rescaling, RandomContrast, RandomCrop, RandomFlip
-from preprocessing import RandomRotation, RandomTranslation, RandomZoom
-from preprocessing import RandomHeight, RandomWidth
+from .preprocessing import Resizing, Rescaling, RandomContrast, RandomCrop, RandomFlip
+from .preprocessing import RandomRotation, RandomTranslation, RandomZoom
+from .preprocessing import RandomHeight, RandomWidth
 
 # Augmentation Layer
 def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
