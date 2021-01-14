@@ -6,11 +6,14 @@ from tensorflow.keras.layers import Input, Dense, Activation, Flatten, Add
 from tensorflow.keras.layers import Conv2D, MaxPool2D, AveragePooling2D, ZeroPadding2D
 from tensorflow.keras.layers import BatchNormalization, Dropout
 from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
-from tensorflow.keras.layers.experimental.preprocessing import Resizing, Rescaling
-from tensorflow.keras.layers.experimental.preprocessing import RandomContrast, RandomCrop
-from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
-from tensorflow.keras.layers.experimental.preprocessing import RandomTranslation, RandomZoom
-from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, RandomWidth
+# from tensorflow.keras.layers.experimental.preprocessing import Resizing, Rescaling
+# from tensorflow.keras.layers.experimental.preprocessing import RandomContrast, RandomCrop
+# from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
+# from tensorflow.keras.layers.experimental.preprocessing import RandomTranslation, RandomZoom
+# from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, RandomWidth
+from preprocessing import Resizing, Rescaling, RandomContrast, RandomCrop, RandomFlip
+from preprocessing import RandomRotation, RandomTranslation, RandomZoom
+from preprocessing import RandomHeight, RandomWidth
 
 # Augmentation Layer
 def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
