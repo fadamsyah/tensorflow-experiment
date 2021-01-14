@@ -6,19 +6,20 @@ from tensorflow.keras.layers import Input, Dense, Activation, Flatten, Add
 from tensorflow.keras.layers import Conv2D, MaxPool2D, AveragePooling2D, ZeroPadding2D
 from tensorflow.keras.layers import BatchNormalization, Dropout
 from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
-# from tensorflow.keras.layers.experimental.preprocessing import Resizing, Rescaling
-# from tensorflow.keras.layers.experimental.preprocessing import RandomContrast, RandomCrop
-# from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
-# from tensorflow.keras.layers.experimental.preprocessing import RandomTranslation, RandomZoom
-# from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, RandomWidth
-from .preprocessing import Resizing, Rescaling, RandomContrast, RandomCrop, RandomFlip
-from .preprocessing import RandomRotation, RandomTranslation, RandomZoom
-from .preprocessing import RandomHeight, RandomWidth
+from tensorflow.keras.layers.experimental.preprocessing import Resizing, Rescaling
+from tensorflow.keras.layers.experimental.preprocessing import RandomContrast, RandomCrop
+from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
+from tensorflow.keras.layers.experimental.preprocessing import RandomTranslation, RandomZoom
+from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, RandomWidth
+
+# Mish activation function
+def mish(x):
+    return x * tf.tanh(tf.log(1. + tf.exp(x)))
 
 # Augmentation Layer
 def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
              flip=None, rotation=None, translation=None, zoom=None,
-             height=None, width=None, name='aug_layer'):
+             height=None, width=None, name='augmentation_layer'):
     
     aug_layer = Sequential(name=name)
     
@@ -35,28 +36,22 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     
     return aug_layer
 
-# VGG For Low Res Image Classification
+# VGG16 For Low Res Image Classification
+# Here, Mish activation function is used instead of ReLU
 def VGG(input_shape, n_class, aug_layer=None):
     X_input = Input(input_shape)
         
     def ConvBNReluBlock(filters, name):
         block = Sequential([Conv2D(filters, (3,3), strides=(1,1), padding="same", use_bias=False),
                             BatchNormalization(),
-                            Activation('relu')
-                           ], name=name)
+                            # Activation('relu'),
+                            Activation(mish)],
+                           name=name)
         return block
 
     def VGGBlock(X, filters, n_conv, name):
         for i in range(1, n_conv+1):
             X = ConvBNReluBlock(filters, name+f'_conv_bn_relu{i}')(X)
-        X = MaxPool2D((2,2), strides=2, padding="valid", name=name+'_pool')(X)
-        return X
-
-    def ArchievedBlock(X, filters, n_conv, name):
-        for i in range(1, n_conv+1):
-            X = Conv2D(filters, (3,3), strides=(1,1), padding="same", use_bias=False, name=name+f'_conv{i}')(X)
-            X = BatchNormalization(name=name+f'_bn{i}')(X)
-            X = Activation('relu', name=name+f'_relu{i}')(X)
         X = MaxPool2D((2,2), strides=2, padding="valid", name=name+'_pool')(X)
         return X
         
@@ -70,10 +65,12 @@ def VGG(input_shape, n_class, aug_layer=None):
     X = VGGBlock(X, 512, 3, 'block5')
     
     X = Flatten(name='flatten_layer')(X)
-    X = Dense(512, activation='relu', name='dense_layer1')(X)
-    X = Dropout(0.5, name='dropout_layer1')(X)
-    X = Dense(512, activation='relu', name='dense_layer2')(X)
-    X = Dropout(0.5, name='dropout_layer2')(X)
+    X = Dense(512, activation='linear', name='dense_layer1')(X)
+    X = Activation(mish, name='mish_activation1')(X)
+    X = Dropout(0.4, name='dropout_layer1')(X)
+    X = Dense(512, activation='linear', name='dense_layer2')(X)
+    X = Activation(mish, name='mish_activation2')(X)
+    X = Dropout(0.4, name='dropout_layer2')(X)
     if n_class == 1: X = Dense(1, activation='sigmoid', name='output_layer')(X)
     else: X = Dense(n_class, activation='softmax', name='output_layer')(X)
     
