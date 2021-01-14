@@ -12,10 +12,6 @@ from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, Rando
 from tensorflow.keras.layers.experimental.preprocessing import RandomTranslation, RandomZoom
 from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, RandomWidth
 
-# Mish activation function
-def mish(x):
-    return x * tf.tanh(tf.math.log(1. + tf.exp(x)))
-
 # Augmentation Layer
 def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
              flip=None, rotation=None, translation=None, zoom=None,
@@ -37,15 +33,14 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     return aug_layer
 
 # VGG16 For Low Res Image Classification
-# Here, Mish activation function is used instead of ReLU
+# Here, Swish activation function is used instead of ReLU
 def VGG(input_shape, n_class, aug_layer=None):
     X_input = Input(input_shape)
         
     def ConvBNReluBlock(filters, name):
         block = Sequential([Conv2D(filters, (3,3), strides=(1,1), padding="same", use_bias=False),
                             BatchNormalization(),
-                            # Activation('relu'),
-                            Activation(mish)],
+                            Activation('swish')],
                            name=name)
         return block
 
@@ -65,11 +60,9 @@ def VGG(input_shape, n_class, aug_layer=None):
     X = VGGBlock(X, 512, 3, 'block5')
     
     X = Flatten(name='flatten_layer')(X)
-    X = Dense(512, activation='linear', name='dense_layer1')(X)
-    X = Activation(mish, name='mish_activation1')(X)
+    X = Dense(512, activation='swish', name='dense_layer1')(X)
     X = Dropout(0.4, name='dropout_layer1')(X)
-    X = Dense(512, activation='linear', name='dense_layer2')(X)
-    X = Activation(mish, name='mish_activation2')(X)
+    X = Dense(512, activation='swish', name='dense_layer2')(X)
     X = Dropout(0.4, name='dropout_layer2')(X)
     if n_class == 1: X = Dense(1, activation='sigmoid', name='output_layer')(X)
     else: X = Dense(n_class, activation='softmax', name='output_layer')(X)
