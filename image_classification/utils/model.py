@@ -14,7 +14,7 @@ from tensorflow.keras.layers.experimental.preprocessing import RandomHeight, Ran
 
 # Mish activation function
 def mish(x):
-    return x * tf.tanh(tf.log(1. + tf.exp(x)))
+    return x * tf.tanh(tf.math.log(1. + tf.exp(x)))
 
 # Augmentation Layer
 def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
