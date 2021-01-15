@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Activation, Flatten, Add
-from tensorflow.keras.layers import Conv2D, MaxPool2D, AveragePooling2D, ZeroPadding2D
+from tensorflow.keras.layers import Conv2D, MaxPool2D, AveragePooling2D, ZeroPadding2D, GlobalAveragePooling2D
 from tensorflow.keras.layers import BatchNormalization, Dropout
 from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from tensorflow.keras.layers.experimental.preprocessing import Resizing, Rescaling
@@ -31,6 +31,45 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     if width: aug_layer.add(RandomWidth(width))
     
     return aug_layer
+
+# Transfer Learning with EfficientNetB0 for Image Classification
+def EfficientNetB0(input_shape, n_class, aug_layer=None,
+                   weights="imagenet", base_trainable=False):
+    
+    # Import the pretrained model without its head
+    base =  tf.keras.applications.EfficientNetB0(
+        include_top=None,
+        weights=weights,
+        input_shape=input_shape)
+    
+    # Freeze every layer of pretrained model
+    # Unfreeze the 7th block
+    for layer in base.layers:
+        if layer.name == 'block7a_expand_conv':
+            break
+        layer.trainable= base_trainable
+    
+    # Output layer
+    if n_class == 1: output_layer = Dense(1, activation='sigmoid', name='output_layer')
+    else: output_layer = Dense(n_class, activation='softmax', name='output_layer')
+    
+    if aug_layer is None:
+        return Sequential([Input(input_shape),
+                            base,
+                            GlobalAveragePooling2D(name='global_avg_pool'),
+                            Dropout(0.4, name='dropout_layer1'),
+                            Dense(1280, activation='swish', name='fc_layer'),
+                            Dropout(0.4, name='dropout_layer2'),
+                            output_layer])
+    
+    return Sequential([Input(input_shape),
+                       aug_layer,
+                       base,
+                       GlobalAveragePooling2D(name='global_avg_pool'),
+                       Dropout(0.3, name='dropout_layer1'),
+                       Dense(1280, activation='swish', name='fc_layer'),
+                       Dropout(0.3, name='dropout_layer2'),
+                       output_layer])
 
 # VGG16 For Low Res Image Classification
 # Here, Swish activation function is used instead of ReLU
