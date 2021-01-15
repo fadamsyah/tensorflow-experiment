@@ -41,7 +41,7 @@ def EfficientNetB0(input_shape, n_class, aug_layer=None,
     base =  tf.keras.applications.EfficientNetB0(
         include_top=None,
         weights=weights,
-        input_shape=input_shape)
+        input_shape=None)
     
     # Freeze every layer of pretrained model
     # Unfreeze the 7th block
