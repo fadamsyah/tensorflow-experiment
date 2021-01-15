@@ -19,7 +19,7 @@ def AugLayer(resize=None, rescaling=None, contrast=None, crop=None,
     
     aug_layer = Sequential(name=name)
     
-    if resize: aug_layer.add(Resizing(*resize, interpolation='lanczos3'))
+    if resize: aug_layer.add(Resizing(*resize, interpolation='bicubic'))
     if rescaling: aug_layer.add(Rescaling(rescaling))
     if contrast: aug_layer.add(RandomContrast(contrast))
     if crop: aug_layer.add(RandomCrop(*crop))
